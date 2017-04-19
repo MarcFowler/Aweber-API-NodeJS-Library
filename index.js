@@ -91,7 +91,7 @@ module.exports = function(consumerKey, consumerSecret, callbackURL){
             params.oauth_signature = oauth.v1.get_signature(type.toUpperCase(), url, params, consumerSecret, tokenSecret);
           }
 
-          if(type == 'get' || type == 'delete'){
+          if(['get', 'delete'].indexOf(type) !== -1) {
             unirest[type](url+'?'+qs.stringify(params)).end(function(response){
               if(!response.ok){
                 cb(response.body);
@@ -101,15 +101,11 @@ module.exports = function(consumerKey, consumerSecret, callbackURL){
             });
           }
 
-          if(type == 'put' || type == 'post'){
-            putOrPost(type, url, params, cb);
-          }
-
-          if(type == 'patch') {
+          if(['patch', 'put', 'post'].indexOf(type) !== -1) {
             params = common;
             params.oauth_token = token;
             params.oauth_signature = oauth.v1.get_signature(type.toUpperCase(), url, params, consumerSecret, tokenSecret);
-            unirest.patch(url+'?'+qs.stringify(params)).type('json').send(patch_params).end(function(response){
+            unirest[(type === 'patch' ? 'patch' : 'post')](url+'?'+qs.stringify(params)).type('json').send(patch_params).end(function(response){
               if(!response.ok){
                 cb(response.body);
               } else {
